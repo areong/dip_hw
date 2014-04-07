@@ -5,6 +5,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include "imageprocessing/ImageProcessing.h"
+#include "imageprocessing/Histogram.h"
 
 int main(int argc, char **argv) {
     if (argc != 4) {
@@ -40,6 +41,10 @@ int main(int argc, char **argv) {
         std::cout << "Command for interpolation is wrong." << std::endl;
         return -1;
     }
+
+    Histogram* hist = new Histogram(image);
+    hist->calcCumHist();
+    hist->calcInvCumHist();
 
     cv::namedWindow("Original picture", cv::WINDOW_AUTOSIZE);
     cv::imshow("Original picture", image);
