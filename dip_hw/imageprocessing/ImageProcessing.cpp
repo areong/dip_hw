@@ -1,12 +1,61 @@
 #include "ImageProcessing.h"
 #include <cmath>
 #include <iostream>
+#include "Histogram.h"
 
 ImageProcessing::ImageProcessing() {
 
 }
 
 ImageProcessing::~ImageProcessing() {
+
+}
+
+void ImageProcessing::histogramEqualization(const cv::Mat &src, cv::Mat &dst) {
+    int w = src.cols;
+    int h = src.rows;
+    int pixels = w * h;
+    int channels = src.channels();
+
+    // Calculate histogram.
+    Histogram* hist = new Histogram(src);
+    hist->calcCumHist();
+
+    // Create destination image.
+    dst.create(h, w, src.type());
+
+    // Fill the destination image.
+    for (int p = 0; p < pixels; p++) {
+        for (int ch = 0; ch < channels; ch++) {
+            int value = src.data[channels * p + ch];
+            dst.data[channels * p + ch] = (int)hist->valueCumHist(ch, value);
+        }
+    }
+}
+
+void ImageProcessing::histogramSpecification(const cv::Mat &src, const cv::Mat &src2, cv::Mat &dst) {
+    int w = src.cols;
+    int h = src.rows;
+    int pixels = w * h;
+    int channels = src.channels();
+
+    // Calculate histogram.
+    Histogram* hist = new Histogram(src);
+    hist->calcCumHist();
+    Histogram* hist2 = new Histogram(src2);
+    hist2->calcInvCumHist();
+
+    // Create destination image.
+    dst.create(h, w, src.type());
+
+    // Fill the destination image.
+    for (int p = 0; p < pixels; p++) {
+        for (int ch = 0; ch < channels; ch++) {
+            int value = src.data[channels * p + ch];
+            int interValue = (int)hist->valueCumHist(ch, value);
+            dst.data[channels * p + ch] = (int)hist2->valueInvCumHist(ch, interValue);
+        }
+    }
 
 }
 

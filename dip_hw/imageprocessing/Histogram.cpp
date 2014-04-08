@@ -1,5 +1,4 @@
 #include "Histogram.h"
-//#include <iostream>
 
 Histogram::Histogram(const cv::Mat &src) {
     hasCalcCumHist = false;
@@ -31,8 +30,6 @@ Histogram::Histogram(const cv::Mat &src) {
     for (int i = 0; i < depth; i++) {
         for (int ch = 0; ch < channels; ch++) {
             hist[ch][i] /= pixels;
-            //if (ch == 0)
-            //    std::cout << i << "\t" << hist[ch][i] << std::endl;
         }
     }
 }
@@ -92,8 +89,6 @@ void Histogram::calcCumHist() {
     for (int i = 0; i < depth; i++) {
         for (int ch = 0; ch < channels; ch++) {
             cumHist[ch][i] *= depth - 1;
-            //if (ch == 0)
-            //    std::cout << i << "\t" << cumHist[ch][i] << std::endl;
         }
     }
 }
@@ -107,6 +102,10 @@ double Histogram::valueCumHist(int channel, int index) {
 }
 
 void Histogram::calcInvCumHist() {
+    if (!hasCalcCumHist) {
+        calcCumHist();
+    }
+
     hasCalcInvCumHist = true;
 
     // Create cummulative histogram arrays.
@@ -133,8 +132,6 @@ void Histogram::calcInvCumHist() {
                 // Fill the invCumHist from icLast + 1 to cumHist[ch][ic] with ic.
                 for (int ii = iiLast[ch] + 1; ii <= cumHist[ch][ic]; ii++) {
                     invCumHist[ch][ii] = (int)ic;
-                    //if (ch == 0)
-                    //    std::cout << ii << "\t" << invCumHist[ch][ii] << std::endl;
                 }   
                 iiLast[ch] = (int)cumHist[ch][ic];
             } else {
@@ -142,10 +139,14 @@ void Histogram::calcInvCumHist() {
             }
         }
     }
+}
 
-    //for (int ii = 0; ii < depth; ii++) {
-    //    std::cout << ii << "\t" << invCumHist[0][ii] << std::endl;
-    //}
+int Histogram::valueInvCumHist(int channel, int index) {
+    if (!isChannelAndIndexValid(channel, index)) {
+        return -1;
+    } else {
+        return invCumHist[channel][index];
+    }
 }
 
 // Private:
